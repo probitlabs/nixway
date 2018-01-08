@@ -14,9 +14,13 @@ rec {
     };
     nightlyPkg = pkgs.callPackage nightlyExpr {};
     mkNightlyPkg = pkg: let
-        byI = getDailyByI date "rust";
-    in nightlyPkg.${pkg} {
-        date = formatDate "-" (byI 0).just;
-        hash = x: (byI 1).just or x;
-    };
+        byI = getDailyByI date pkg;
+    in nightlyPkg.${pkg} ({}
+        // {date = formatDate "-" (byI 0).just;}
+        // (
+            if (byI 1).nothing or false
+            then {}
+            else {hash = (byI 1).just;}
+        )
+    );
 }

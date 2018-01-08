@@ -1,6 +1,6 @@
 {
     productName ? "firefox-stransky",
-    date ? ["2018" "01" "02"],
+    date ? ["2018" "01" "03"],
 
     officalBranding ? false,
     crashReporter ? false,
