@@ -1,7 +1,7 @@
 let
     nightlyExpr = [
-        "9e09d579431940367c1f6de9463944eef66de1d4";
-        "03zkjnzd13142yla52aqmgbbnmws7q8kn1l5nqaly22j31f125xy";
+        "9e09d579431940367c1f6de9463944eef66de1d4"
+        "03zkjnzd13142yla52aqmgbbnmws7q8kn1l5nqaly22j31f125xy"
     ];
 in {
     "2018"."01"."02" = {
@@ -13,4 +13,4 @@ in {
 	];
         inherit nightlyExpr;
     };
-};
+}
