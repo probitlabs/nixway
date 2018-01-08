@@ -1,8 +1,5 @@
 let
-    nightlyExpr = [
-        "9e09d579431940367c1f6de9463944eef66de1d4"
-        "03zkjnzd13142yla52aqmgbbnmws7q8kn1l5nqaly22j31f125xy"
-    ];
+    nightlyExpr = ["7081bacc88037d9e218f62767892102c96b0a321"];
 in {
     "2018"."01"."02" = {
     	stransky = [
