@@ -1,24 +1,43 @@
 {
-    productName ? "firefox",
-    date ? "2018-01-01",
+    productName ? "firefox-stransky",
+    date ? ["2018" "01" "02"],
 }:
 
-let
-    src = pkgs.fetchFromGitHub {
-        owner = "stransky";
-        repo = "gecko-dev";
-        inherit rev;
-        inherit sha256;
+with import ./lowbar.nix; let
+    daily = select (import ./daily.nix) date;
+    getDailySet = pk: {
+        rev = e daily.nightlyExpr 0;
+        sha256 = e daily.nightlyExpr 1;
     };
-    isntToolkit = (flag:
-        builtins.substring 0 25 flag != "--enable-default-toolkit"
-    );
+in rec {
+    firefoxWay = {
+        src = ghFetch {
+            owner = "stransky";
+            repo = "gecko-dev";
+            rev = e daily.firefoxWay 0;
+            sha256 = e daily.firefoxWay 1;
+        };
+        buildInputs = with pkgs; [
+            gcc perl python
+            makeWrapper
+            gtk2 gtk3
+            sqlite unzip libevent
+            libstartup_notification
+            cairo autoconf213
+        ];
+    };
 
-    rustNightlyNixRepo = pkgs.fetchFromGitHub {
-        owner = "solson";
-        repo = "rust-nightly-nix";
-        rev = "9e09d579431940367c1f6de9463944eef66de1d4";
-        sha256 = "03zkjnzd13142yla52aqmgbbnmws7q8kn1l5nqaly22j31f125xy";
+    nightlyExpr = rec {
+        src = with getDailySet "nightlyExpr"; ghFetch {
+            owner = "solson";
+            repo = "rust-nightly-nix";
+            inherit rev; inherit sha256;
+        };
+        pk = pkgs.callPackage src {};
+    };
+
+    rust = {
+      src = with g
     };
     rustPkgs = pkgs.callPackage rustNightlyNixRepo {};
     rustDate = "2018-01-01";
@@ -36,5 +55,5 @@ in stdenv.mkDerivation {
         pkgs.llvmPackages.clang-unwrapped
     ] ++ old.nativeBuildInputs;
     #rustPkgs.cargo rustPkgs.rustc]);
-}
+};
  
