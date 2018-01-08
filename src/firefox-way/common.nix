@@ -1,13 +1,14 @@
 {
-    productName ? "firefox";
+    productName ? "firefox",
+    date ? "2018-01-01",
 }:
 
 let
     src = pkgs.fetchFromGitHub {
         owner = "stransky";
         repo = "gecko-dev";
-        rev = "0c246d7027131f3d023f3f5d0183682addfdcd71";
-        sha256 = "0d5s6kgac7rmq50162pqv2dzr8jbshkikwpi6wb2z39cp50iz13s";
+        inherit rev;
+        inherit sha256;
     };
     isntToolkit = (flag:
         builtins.substring 0 25 flag != "--enable-default-toolkit"
