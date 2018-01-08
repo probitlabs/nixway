@@ -1,21 +1,36 @@
 {
     productName ? "firefox-stransky",
     date ? ["2018" "01" "02"],
+
+    officalBranding ? false,
+    crashReporter ? false,
+    webRtc ? true,
+
+    geoLocation ? true,
+    googleApi ? false,
+    safeBrowsing ? true,
+    drm ? false,
+
+    pulseaudio ? true,
+    alsa ? true,
+    ffmpeg ? true,
+    genericSecService ? true,
 }:
 
 with import ./lowbar.nix; let
-    daily = select (import ./daily.nix) date;
-    getDailySet = pk: {
-        rev = e daily.nightlyExpr 0;
-        sha256 = e daily.nightlyExpr 1;
+    selectDate = select (import ./daily.nix);
+    getDailyByI = key: e (selectDate date).${key};
+    getDailySet = key: {
+        rev = getDailyByI key 0;
+        sha256 = getDailyByI key 1;
     };
-in rec {
+
+in with import ./rust.nix; rec {
     firefoxWay = {
-        src = ghFetch {
+        src = with getDailySet "stransky"; ghFetch {
             owner = "stransky";
             repo = "gecko-dev";
-            rev = e daily.firefoxWay 0;
-            sha256 = e daily.firefoxWay 1;
+            inherit rev; inherit sha256;
         };
         buildInputs = with pkgs; [
             gcc perl python
@@ -27,24 +42,12 @@ in rec {
         ];
     };
 
-    nightlyExpr = rec {
-        src = with getDailySet "nightlyExpr"; ghFetch {
-            owner = "solson";
-            repo = "rust-nightly-nix";
-            inherit rev; inherit sha256;
-        };
-        pk = pkgs.callPackage src {};
+    rustc = {
+        
     };
-
-    rust = {
-      src = with g
-    };
-    rustPkgs = pkgs.callPackage rustNightlyNixRepo {};
-    rustDate = "2018-01-01";
 in stdenv.mkDerivation {
     name = "${product}-way-20180102";
     enableOfficalBranding = false;
-    inherit src;
     configureFlags = (builtins.filter isntToolkit old.configureFlags) ++ [
         "--enable-default-toolkit=cairo-gtk3-wayland"
     ];

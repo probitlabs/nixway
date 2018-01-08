@@ -5,11 +5,11 @@ let
     ];
 in {
     "2018"."01"."02" = {
-    	firefoxWay = [
+    	stransky = [
 	    "2b40d3260ae9e3f6f482db6c544329be1c343877"
 	];
 	rust = [
-	    "2018-01-02"
+	    ["2018" "01" "02"]
 	];
         inherit nightlyExpr;
     };
