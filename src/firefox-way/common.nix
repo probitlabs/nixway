@@ -30,6 +30,8 @@ let
         repo = "gecko-dev";
         inherit rev sha256;
     };
+
+    nsprFlag = with pkgs; "-I${nspr.dev}/include/nspr -I${nss.dev}/include/nss";
     llvm = with pkgs.llvmPackages; {
         unC = clang-unwrapped;
         wpC = clang;
@@ -39,11 +41,6 @@ in rec {
         name = "${productName}-way-${formatDate "" date}";
 
   	src = stranskySrc;
-
-        #NIX_CFLAGS_COMPILE = with pkgs; ''
-        #    -I${nspr.dev}/include/nspr
-        #    -I${nss.dev}/include/nss
-        #'';
 
         builder = builtins.toFile "builder.sh" ''
             #!/bin/bash
@@ -62,18 +59,20 @@ in rec {
             ac_add_options --enable-debug
             ac_add_options --enable-profiling
             ac_add_options --disable-updater
-            ac_add_options --with-system-nspr
+            mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
         '';
+        #ac_add_options --with-system-nspr
 
         buildInputs = []
-            #++ [clang]
+            ++ (with pkgs.xorg; [
+                libX11 libXi libXrender libXft libXt libXext xextproto
+            ])
             ++ (with pkgs; [
                 dbus dbus_glib
                 zip gnused 
                 gcc perl python
                 gtk2 gtk3
                 yasm mesa libpng
-                xorg.libX11 xorg.libXi xorg.libXrender xorg.libXft xorg.libXt
                 kerberos fontconfig
                 alsaLib libpulseaudio
                 gstreamer gst-plugins-base
