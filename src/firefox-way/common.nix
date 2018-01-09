@@ -21,35 +21,42 @@ pkgs:
 
 with {}
     // import ./lowbar.nix
-    // import ./rust.nix date pkgs
     // import ./date.nix
 ;
 
 let
-    ghFetch = pkgs.fetchFromGithub;
+    stranskySrc = with getDailySet date "stransky"; pkgs.fetchFromGitHub {
+        owner = "stransky";
+        repo = "gecko-dev";
+        inherit rev sha256;
+    };
 in rec {
     firefoxWay = {
         name = "${productName}-way-${formatDate "" date}";
-        src = with getDailySet date "stransky"; ghFetch {
-            owner = "stransky";
-            repo = "gecko-dev";
-            inherit rev sha256;
-        };
+        src = stranskySrc;
 
-        builder = builtins.toFile "builder.sh" "./mach build";
+        builder = builtins.toFile "builder.sh" ''
+            #!/bin/bash
+            source $stdenv/setup
+            cp -r $src stransky
+            chmod -R u+rw stransky
+            cd stransky
+            ./mach build
+        '';
 
-        buildInputs = [
-            rustc cargo
-        ] ++ (with pkgs; [
+        buildInputs = with pkgs; [
+            latest.rustChannels.nightly.rust
             gcc perl python
             makeWrapper
             gtk2 gtk3
             sqlite unzip libevent
             libstartup_notification
             cairo autoconf213
-        ]);
-    };
+        ];
 
-    rustc = mkNightlyPkg "rustc";
-    cargo = mkNightlyPkg "cargo";
+        nativeBuildInputs = with pkgs; [
+            gnused which perl python
+            latest.rustChannels.nightly.rust
+        ];
+    };
 }
