@@ -30,6 +30,7 @@ let
         repo = "gecko-dev";
         inherit rev sha256;
     };
+    clang = pkgs.llvmPackages.clang-unwrapped;
 in rec {
     firefoxWay = {
         name = "${productName}-way-${formatDate "" date}";
@@ -41,22 +42,39 @@ in rec {
             cp -r $src stransky
             chmod -R u+rw stransky
             cd stransky
+            echo "$configureFlags" >> ./.mozconfig
             ./mach build
         '';
 
-        buildInputs = with pkgs; [
-            latest.rustChannels.nightly.rust
-            gcc perl python
-            makeWrapper
-            gtk2 gtk3
-            sqlite unzip libevent
-            libstartup_notification
-            cairo autoconf213
-        ];
+        configureFlags = ''
+            ac_add_options --with-libclang-path=${clang}/lib
+            ac_add_options --with-clang-path=${clang}/bin/clang
+            ac_add_options --disable-gconf
+        '';
+
+        buildInputs = []
+            #++ [clang]
+            ++ (with pkgs; [
+                dbus dbus_glib
+                zip gnused 
+                gcc perl python
+                gtk2 gtk3
+                yasm mesa libpng
+                xorg.libX11 xorg.libXi xorg.libXrender xorg.libXft xorg.libXt
+                kerberos fontconfig
+                alsaLib libpulseaudio
+                gstreamer gst-plugins-base
+                sqlite unzip libevent
+                libstartup_notification
+                cairo autoconf213
+                pkgconfig
+                latest.rustChannels.nightly.rust
+                libnotify
+            ])
+        ;
 
         nativeBuildInputs = with pkgs; [
-            gnused which perl python
-            latest.rustChannels.nightly.rust
+            gnused which python
         ];
     };
 }
