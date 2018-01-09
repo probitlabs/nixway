@@ -40,7 +40,10 @@ in rec {
 
   	src = stranskySrc;
 
-  	NIX_CFLAGS_COMPILE = "-I${nspr.dev}/include/nspr -I${nss.dev}/include/nss";
+        #NIX_CFLAGS_COMPILE = with pkgs; ''
+        #    -I${nspr.dev}/include/nspr
+        #    -I${nss.dev}/include/nss
+        #'';
 
         builder = builtins.toFile "builder.sh" ''
             #!/bin/bash
@@ -56,8 +59,10 @@ in rec {
             ac_add_options --with-libclang-path=${unC}/lib
             ac_add_options --with-clang-path=${wpC}/bin/clang
             ac_add_options --disable-gconf
-            ac_add_options --enable-debugging
+            ac_add_options --enable-debug
             ac_add_options --enable-profiling
+            ac_add_options --disable-updater
+            ac_add_options --with-system-nspr
         '';
 
         buildInputs = []
@@ -72,12 +77,15 @@ in rec {
                 kerberos fontconfig
                 alsaLib libpulseaudio
                 gstreamer gst-plugins-base
-                sqlite unzip libevent
+                unzip libevent
                 libstartup_notification
                 cairo autoconf213
                 pkgconfig
                 latest.rustChannels.nightly.rust
-                libnotify
+                wayland wayland-protocols xwayland
+                file libnotify
+                nspr
+                perl zlib sqlite
             ])
         ;
 
