@@ -30,7 +30,10 @@ let
         repo = "gecko-dev";
         inherit rev sha256;
     };
-    clang = pkgs.llvmPackages.clang-unwrapped;
+    llvm = with pkgs.llvmPackages; {
+        unC = clang-unwrapped;
+        wpC = clang;
+    };
 in rec {
     firefoxWay = {
         name = "${productName}-way-${formatDate "" date}";
@@ -46,10 +49,12 @@ in rec {
             ./mach build
         '';
 
-        configureFlags = ''
-            ac_add_options --with-libclang-path=${clang}/lib
-            ac_add_options --with-clang-path=${clang}/bin/clang
+        configureFlags = with llvm; ''
+            ac_add_options --with-libclang-path=${unC}/lib
+            ac_add_options --with-clang-path=${wpC}/bin/clang
             ac_add_options --disable-gconf
+            ac_add_options --enable-debugging
+            ac_add_options --enable-profiling
         '';
 
         buildInputs = []
