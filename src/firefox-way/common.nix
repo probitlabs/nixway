@@ -37,7 +37,10 @@ let
 in rec {
     firefoxWay = {
         name = "${productName}-way-${formatDate "" date}";
-        src = stranskySrc;
+
+  	src = stranskySrc;
+
+  	NIX_CFLAGS_COMPILE = "-I${nspr.dev}/include/nspr -I${nss.dev}/include/nss";
 
         builder = builtins.toFile "builder.sh" ''
             #!/bin/bash
