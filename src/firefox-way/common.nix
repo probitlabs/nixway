@@ -31,7 +31,8 @@ let
         inherit rev sha256;
     };
 
-    nsprFlag = with pkgs; "-I${nspr.dev}/include/nspr -I${nss.dev}/include/nss";
+    nspr = pkgs.nspr;
+    nsprFlag = "-I${nspr.dev}/include/nspr";
     llvm = with pkgs.llvmPackages; {
         unC = clang-unwrapped;
         wpC = clang;
@@ -58,10 +59,14 @@ in rec {
             ac_add_options --disable-gconf
             ac_add_options --enable-debug
             ac_add_options --enable-profiling
+            ac_add_options --enable-jemalloc
             ac_add_options --disable-updater
-            mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
+            ac_add_options --disable-necko-wifi
+            ac_add_options --disable-maintenance-service
+            ac_add_options --disable-tests
+            ac_add_options --with-system-nspr
         '';
-        #ac_add_options --with-system-nspr
+        #mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
 
         buildInputs = []
             ++ (with pkgs.xorg; [
@@ -83,7 +88,7 @@ in rec {
                 latest.rustChannels.nightly.rust
                 wayland wayland-protocols xwayland
                 file libnotify
-                nspr
+                nspr jemalloc
                 perl zlib sqlite
             ])
         ;
