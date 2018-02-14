@@ -38,10 +38,10 @@ let
     suffix = if channel == "stable" then "" else "-${channel}";
 in {
     ozone = rec {
-        name = product + suffix + "-" + version;
+        name = product + suffix;
         inherit meta;
 
-        inherit (info) src version;
+        inherit (info) src;
         inherit (pkgs) fish;
         builder = builtins.toFile "builder.sh" ''
             #!$fish
