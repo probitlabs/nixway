@@ -8,6 +8,6 @@ map stdenv.mkDerivation (
     (e: e.isDeriv or true)
     (
         attrValues
-        (import ./common.nix pkgs {})
+        (import ./deriv.nix pkgs {})
     )
 )

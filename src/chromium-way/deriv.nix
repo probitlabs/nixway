@@ -55,6 +55,9 @@ in {
             set -x PATH $PWD/out/Release $PATH
         '';
         buildPhase = ''
+            set ozArgs is_debug=false use_ozone=true enable_mus=true use_xkbcommon=true
+            gn args out/Ozone --args="$ozArgs"
+            ninja -C out/Ozone chrome
         '';
         nativeBuildInputs = with pkgs // pkgs.python2Packages; [
             ninja which python perl pkgconfig ply jinja2 nodejs gnutar
