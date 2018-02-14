@@ -1,5 +1,5 @@
 {
-    info,
+    info ? {version = "1.0.0"; src = https://example.org/;},
 
     product ? "chromium-way",
     channel ? "stable",
@@ -35,12 +35,11 @@ let
         libpci libcap libusb1 cups
     ];
     suffix = if channel == "stable" then "" else "-${channel}";
-    metadata = import ./metadata.nix {};
-
+    meta = import ./metadata.nix pkgs;
 in {
     ozone = rec {
         name = product + suffix + "-" + version;
-        inherit (metadata) description homepage license platforms;
+        inherit meta;
 
         inherit (info) src version;
         inherit (pkgs) fish;
