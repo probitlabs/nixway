@@ -1,5 +1,8 @@
+pkgs:
+
 {
-    info ? {version = "1.0.0"; src = https://example.org/;},
+    info ? import ./info.nix pkgs,
+    meta ? import ./meta.nix pkgs,
 
     product ? "chromium-way",
     channel ? "stable",
@@ -8,8 +11,6 @@
     cupsSupport ? true,
     commandLineArgs ? "",
 }:
-
-pkgs:
 
 let
     llvm = with pkgs.llvmPackages; {
@@ -35,7 +36,6 @@ let
         libpci libcap libusb1 cups
     ];
     suffix = if channel == "stable" then "" else "-${channel}";
-    meta = import ./metadata.nix pkgs;
 in {
     ozone = rec {
         name = product + suffix + "-" + version;
