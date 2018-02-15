@@ -52,13 +52,16 @@ in {
         #'';
         configurePhase = ''
             #!${pkgs.fish}
-            python tools/gn/bootstrap/bootstrap.py -v -s --no-clean
+            echo "Bootstrapping GN…" >&2
+            echo "Setting path…" >&2
             set -x PATH $PWD/out/Release $PATH
         '';
         buildPhase = ''
             #!${pkgs.fish}
             set ozArgs is_debug=false use_ozone=true enable_mus=true use_xkbcommon=true
+            echo "Calling GN…" >&2
             gn args out/Ozone --args="$ozArgs" --ozone-platform=wayland
+            echo "Calling ninja…" >&2
             ninja -C out/Ozone chrome
         '';
         nativeBuildInputs = with pkgs // pkgs.python2Packages; [
