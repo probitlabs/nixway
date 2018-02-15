@@ -36,6 +36,7 @@ let
         libpci libcap libusb1 cups
     ];
     suffix = if channel == "stable" then "" else "-${channel}";
+    esc = pkgs.lib.escapeShellArg;
 in {
     ozone = rec {
         name = product + suffix;
@@ -50,26 +51,32 @@ in {
         #    source <(echo $configurePhase)
         #    source <(echo $buildPhase)
         #'';
-        configurePhase = ''
-            #!${pkgs.fish}
-            echo "===\nBootstrapping GN…" >&2
-            python tools/gn/bootstrap/bootstrap.py -v -s --no-clean
-            echo "===\nSetting path…" >&2
-            set -x PATH $PWD/out/Release $PATH
+
+        #echo "===\nBootstrapping GN…" >&2
+        #python tools/gn/bootstrap/bootstrap.py -v -s --no-clean
+        configureF = builtins.toFile "configure.fish" ''
+            #!$fish
+            echo Something…
         '';
-        buildPhase = ''
-            #!${pkgs.fish}
+        configurePhase = "fish=${pkgs.fish} $configureF";
+
+        buildF = builtins.toFile "build.fish" ''
+            #!$fish
             set OzArgs "is_debug=false" \
               "use_ozone=true" \
               "enable_mus=true" \
               "use_xkbcommon=true"
+            set OzArgs1 (echo -n "$OzArgs")
             echo "===\nCalling GN…" >&2
-            gn args out/Ozone --args="$OzArgs" --ozone-platform=wayland
+            gn args out/Ozone --args="$OzArgs1" --ozone-platform=wayland
             echo "===\nCalling ninja…" >&2
             ninja -C out/Ozone chrome
         '';
+        buildPhase= "fish=${pkgs.fish} $buildF";
+
         nativeBuildInputs = with pkgs // pkgs.python2Packages; [
-            gn ninja which python perl pkgconfig ply jinja2 nodejs gnutar
+            fish gn ninja
+            which python perl pkgconfig ply jinja2 nodejs gnutar
         ];
     };
 }
