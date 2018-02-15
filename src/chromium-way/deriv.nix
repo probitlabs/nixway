@@ -42,21 +42,23 @@ in {
         inherit meta;
 
         inherit (info) src;
-        inherit (pkgs) fish;
-        builder = builtins.toFile "builder.sh" ''
-            #!$fish
-            source $stdenv/setup
+        #inherit (pkgs) fish;
+        #builder = builtins.toFile "builder.sh" ''
+        #    #!$fish
+        #    source $stdenv/setup
 
-            source <(echo $configurePhase)
-            source <(echo $buildPhase)
-        '';
+        #    source <(echo $configurePhase)
+        #    source <(echo $buildPhase)
+        #'';
         configurePhase = ''
+            #!${pkgs.fish}
             python tools/gn/bootstrap/bootstrap.py -v -s --no-clean
             set -x PATH $PWD/out/Release $PATH
         '';
         buildPhase = ''
+            #!${pkgs.fish}
             set ozArgs is_debug=false use_ozone=true enable_mus=true use_xkbcommon=true
-            gn args out/Ozone --args="$ozArgs"
+            gn args out/Ozone --args="$ozArgs" --ozone-platform=wayland
             ninja -C out/Ozone chrome
         '';
         nativeBuildInputs = with pkgs // pkgs.python2Packages; [
