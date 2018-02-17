@@ -43,36 +43,53 @@ in {
         inherit meta;
 
         inherit (info) src;
-        #inherit (pkgs) fish;
-        #builder = builtins.toFile "builder.sh" ''
-        #    #!$fish
-        #    source $stdenv/setup
+        inherit (pkgs) fish;
+        builder = builtins.toFile "builder.sh" ''
+            source $stdenv/setup
 
-        #    source <(echo $configurePhase)
-        #    source <(echo $buildPhase)
-        #'';
+            fish $init
+        '';
 
         #echo "===\nBootstrapping GN…" >&2
-        #python tools/gn/bootstrap/bootstrap.py -v -s --no-clean
-        configureF = builtins.toFile "configure.fish" ''
-            #!$fish
-            echo Something…
-        '';
-        configurePhase = "fish=${pkgs.fish} $configureF";
+        #
+        init = builtins.toFile "init.fish" ''
+            echo == SETUP ==
+            set awkXpr \
+              '{print $3;}' \
+              'BEGIN {FS = "=";} $1 == "PATH" {print $2;}' \
+              'gsub(/\"/, "", $0) {print $0;}' \
+              'BEGIN {FS = ":";} gsub(FS, " ", $0) {print "set", "-gx", "PATH", $0;}'
+            set awkRes (awk $awkXpr[1] ./env-vars \
+              | awk $awkXpr[2] \
+              | awk $awkXpr[3] \
+              | awk $awkXpr[4])
+            echo "$awkRes" | source
+            echo == /SETUP "|PATH" == >&2
+            echo $PATH
+            echo == /PATH == >&2
 
-        buildF = builtins.toFile "build.fish" ''
-            #!$fish
+            echo == CONF == >&2
+            fish ${configurePhase}
+            echo == /CONF "|BUILD" == >&2
+            fish ${buildPhase}
+            echo == /BUILD == >&2
+        '';
+
+        configurePhase = builtins.toFile "conf.fish" ''
             set OzArgs "is_debug=false" \
               "use_ozone=true" \
               "enable_mus=true" \
               "use_xkbcommon=true"
-            set OzArgs1 (echo -n "$OzArgs")
-            echo "===\nCalling GN…" >&2
-            gn args out/Ozone --args="$OzArgs1" --ozone-platform=wayland
-            echo "===\nCalling ninja…" >&2
-            ninja -C out/Ozone chrome
+            set OzArgs1 "$OzArgs"
+            echo === Calling GN… >&2
+            cd $src
+            #python2 ./tools/gn/bootstrap/bootstrap.py -v -s --no-clean
+            gn args --args=$OzArgs1 ./out/Ozone 
         '';
-        buildPhase= "fish=${pkgs.fish} $buildF";
+
+        buildPhase = builtins.toFile "build.fish" ''
+            ninja -C $src/out/Ozone chrome
+        '';
 
         nativeBuildInputs = with pkgs // pkgs.python2Packages; [
             fish gn ninja
