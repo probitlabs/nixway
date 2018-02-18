@@ -91,11 +91,13 @@ in rec {
                 file libnotify
                 nss nspr jemalloc
                 perl zlib sqlite
+                rust-bindgen
             ])
         ;
 
         nativeBuildInputs = with pkgs; [
             gnused which python
+            rust-bindgen #?
         ];
     };
 }
