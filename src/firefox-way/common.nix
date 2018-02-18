@@ -34,7 +34,7 @@ let
     nspr = pkgs.nspr;
     nsprFlag = "-I${nspr.dev}/include/nspr";
     llvm = with pkgs.llvmPackages; {
-        unC = clang-unwrapped;
+        unC = libclang;
         wpC = clang;
     };
 in rec {
@@ -65,8 +65,9 @@ in rec {
             ac_add_options --disable-maintenance-service
             ac_add_options --disable-tests
             ac_add_options --with-system-nspr
+            ac_add_options --with-system-nss 
         '';
-        #mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
+        #            mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
 
         buildInputs = []
             ++ (with pkgs.xorg; [
@@ -88,7 +89,7 @@ in rec {
                 latest.rustChannels.nightly.rust
                 wayland wayland-protocols xwayland
                 file libnotify
-                nspr jemalloc
+                nss nspr jemalloc
                 perl zlib sqlite
             ])
         ;
