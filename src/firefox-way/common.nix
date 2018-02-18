@@ -66,6 +66,7 @@ in rec {
             ac_add_options --disable-tests
             ac_add_options --with-system-nspr
             ac_add_options --with-system-nss 
+            ac_add_options --enable-default-toolkit=cairo-gtk3-wayland
         '';
         #            mk_add_options NIX_CFLAGS_COMPILE="${nsprFlag} $NIX_CFLAGS_COMPILE"
 
